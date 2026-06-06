@@ -26,7 +26,7 @@ def main():
     summary_template = """
         Given the information {information} about a person, I want you to create:
         1. A short summary
-        2. Two interesting facts about that person
+        2. Three interesting facts about that person
     """
     # We can use PromptTemplate
     summary_template = PromptTemplate(
@@ -39,10 +39,10 @@ def main():
     # good for poetry, fiction and out-of-the-box ideas 
     
     #ChatGpt model
-     llm = ChatOpenAI(temperature=0, model="gpt-5")
+    # llm = ChatOpenAI(temperature=0, model="gpt-5")
     
     # Use Gemma model
-    #llm = ChatOllama(temperature=0, model="gemma4:e4b")
+    llm = ChatOllama(temperature=0, model="gemma4:e4b")
 
     # Define variable chain to get response using summary_template | llm 
     # below command is using Langchain expression language (LCEL) i.e., we create a chain composing 
