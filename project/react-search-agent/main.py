@@ -1,6 +1,15 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from typing import List
+from pydantic import BaseModel, Field
+
+# Use Pydantic object - to define a structured data scheme. We use two BaseModel which gives functionality like 
+# data parsing, serialization, and automatic type validations.  And Field class which help us to add
+# Metadata like description to our models as attribute
+# 
+ 
+
 # To create an Agent
 from langchain.agents import create_agent
 # To give tool to agent
@@ -13,6 +22,7 @@ from langchain_openai import ChatOpenAI
 #from tavily import TavilyClient
 # Import langchain-tavily
 from langchain_tavily import TavilySearch
+from langchain_ollama import ChatOllama
 
 #Initialize tavily
 #tavily=TavilyClient()
@@ -42,8 +52,28 @@ def search(query: str) -> str:
     #Search using Tavily and return the result
     return tavily.search(query=query)
 
+# Create the pydantic object, define a new class called Source which inherits from BaseModel
+# Give docString description using """ """
+# Define class's fields using Field class with description, and this field will be used by LLM
+class Source(BaseModel) :
+    """ Schema for a source used by an Agent """
+    url:str = Field(description="The URL of the source")
+
+# We will nest about pydantic source class/object into another pydantic object called Agentic Response
+# This response is the answer from agent which is going to have list of sources (with the source url)
+# With answer attribute/field of string type (str)
+# sources attribute/field for list of pydantic Source objects
+#  
+class AgentResponse(BaseModel) :
+    """Schema for the Agent response with answers and its sources"""
+    answer:str = Field(description = "This is the agent's response to the query")
+    # default_factory is list and agent did not provide any response, this would be an empty list
+    sources: List[Source] = Field(default_factory=list, description = "List of sources used to generate the Agent's response")
+
 # Now define llm and tools
 llm = ChatOpenAI(model="gpt-5")
+
+#llm = ChatOllama(temperature=0.1, model="gemma4:e4b") 
 
 #tools = [search] # Can define n no. of tools similar to search
 # Create an agent with llm model and necessary tools to execute/run 
@@ -52,7 +82,10 @@ llm = ChatOpenAI(model="gpt-5")
 # Initialize Tavily Search, this TavilySearch is already defined as tool using @tool decorator
 tools = [TavilySearch()]
 
-agent = create_agent(model=llm, tools=tools)
+# We want agent to return an object instead of string, so that it can be used by downstream system/function, 
+# or we can render this response in a front end application etc.
+# For this we can add response_format when we create the model
+agent = create_agent(model=llm, tools=tools, response_format=AgentResponse)
 
 def main():
     print("Hello from react-search-agent!")
