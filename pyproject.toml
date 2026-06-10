@@ -1,0 +1,13 @@
+[project]
+name = "langchain-course"
+version = "0.1.0"
+description = "Your LangChain experiments"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv",
+    "langchain",
+    "langchain-community",
+    "langchain-openai",
+    "pinecone>=6,<8",
+    "langchain-pinecone",
+]
